@@ -11,6 +11,10 @@ import com.example.esercizi_develhope_sito.EserciziDevelhopeSito.Entities.Car;
 import com.example.esercizi_develhope_sito.EserciziDevelhopeSito.Enumerates.CarType;
 import com.example.esercizi_develhope_sito.EserciziDevelhopeSito.Repository.CarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,9 +35,23 @@ public class CarController {
         return ResponseEntity.ok(savedCar);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<Car>> getAllCars() {
         return ResponseEntity.ok(carRepository.findAll());
+    }
+
+    @GetMapping("/page")
+    public ResponseEntity<Page<Car>> getAllCars(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Car> cars = carRepository.findAll(pageable);
+
+        return ResponseEntity.ok(cars);
     }
 
     @GetMapping("/{id}")
